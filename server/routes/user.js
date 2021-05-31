@@ -1,10 +1,16 @@
 const { Router } = require('express');
 const User = require('../models/User');
+const { veriTytoken } = require('../middleware/index');
 const router = Router();
 const jwt = require('jsonwebtoken');
 
-router.get("/", (req, res) => {
-    res.send("Hello");
+router.get("/",veriTytoken, async (req, res) => {
+    
+    const uid = req.uid;
+    
+    user = await User.findById(uid);
+
+    res.status(200).send(user);
 });
 
 router.post('/signup', async (req, res) => {
@@ -17,7 +23,7 @@ router.post('/signup', async (req, res) => {
         {
             _id: newUser._id,
             role: "user"
-        }, 'ssecretKey');
+        }, 'secretKey');
     res.status(200).json(token);
 });
 
@@ -30,11 +36,12 @@ router.post('/login', async (req,res) => {
 
     const token = jwt.sign(
         {
-            _id: newUser._id, 
+            _id: user._id, 
             role: "user"
-        }, 'ssecretKey');
+        }, 'secretKey');
     res.status(200).json(token);
 
 });
+
 
 module.exports = router;
